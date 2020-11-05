@@ -1,0 +1,18 @@
+local_cfg.h
+cfg.local
+
+# xilinx artefacts
+*.log
+*.jou
+*.xml
+*.html
+output
+.Xil
+
+# ip addr cfg file
+ESP_IP
+
+# temp targets
+*.vcd
+*.out
+

@@ -1,0 +1,17 @@
+# binary name
+myLinkedModule
+
+# simulatiion result
+*.vcd
+
+# schedule
+*.sched
+
+# intermediate files
+*.so
+*.o
+*.bo
+*.ba
+*.v
+*.h
+*.cxx
