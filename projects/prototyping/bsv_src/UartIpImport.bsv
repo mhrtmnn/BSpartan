@@ -33,12 +33,12 @@ module mkUartLiteIp (UartLiteIp);
 	default_reset rst();         // no reset connections
 
 	/* UART data signals */
-	method tx getTX();
+	method tx 					getTX();
 	method putRX(rx)	 							enable((*inhigh*) EN0);
 
 	/* system signals */
 	method putRSTn(s_axi_aresetn) 					enable((*inhigh*) EN1);
-	method interrupt getInterrupt();
+	method interrupt 			getInterrupt();
 
 	/* AXI signals */
 	interface AxiLiteIface axi;

@@ -89,7 +89,7 @@ module mkRGBDriver(RGBDriver);
 		case(state) matches
 			/* write high part */
 			0: begin
-				$display("[%d] Write HIGH (value: %d, pos: %d)", $time, val, pos);
+				$display("[RGB] [%d] Write HIGH (value: %d, pos: %d)", $time, val, pos);
 				rgb_data <= 1;
 				if (val == 0) begin
 					comp <= fromInteger(c_T0H);
@@ -101,7 +101,7 @@ module mkRGBDriver(RGBDriver);
 
 			/* write low part */
 			1: begin
-				$display("[%d] Write LOW  (value: %d, pos: %d)", $time, val, pos);
+				$display("[RGB] [%d] Write LOW  (value: %d, pos: %d)", $time, val, pos);
 				rgb_data <= 0;
 				if (val == 0) begin
 					comp <= fromInteger(c_T0L);
@@ -128,7 +128,7 @@ module mkRGBDriver(RGBDriver);
 
 			/* write reset part */
 			2: begin
-				$display("[%d] Write RST  (value: %d, pos: %d)", $time, val, pos);
+				$display("[RGB] [%d] Write RST  (value: %d, pos: %d)", $time, val, pos);
 				rgb_data <= 0;
 
 				comp <= fromInteger(c_TRST);
@@ -137,7 +137,7 @@ module mkRGBDriver(RGBDriver);
 
 			/* idle */
 			3: begin
-				$display("[%d] idling", $time);
+				$display("[RGB] [%d] idling", $time);
 				rgb_data <= 0;
 
 				comp <= 100 * fromInteger(c_US);

@@ -2,6 +2,7 @@ package Bs_top;
 
 import ComponentUart::*;
 import ComponentRGB::*;
+import ComponentI2S::*;
 import GlobalTypes::*;
 import TriState::*;
 import Timing::*;
@@ -43,6 +44,7 @@ module mkBs_top(Bs_top);
 	/* sub modules */
 	let rgb_drv 	<- mkRGBDriver();
 	let uart_drv 	<- mkUARTip();
+	let i2s 		<- mkI2Sip();
 
 	/* state of GPIO ports */
 	Vector#(10, Reg#(bit)) board_in 	<- replicateM(mkReg(0));
@@ -114,7 +116,6 @@ module mkBs_top(Bs_top);
 		/* update gpios */
 		board_out[9] <= port_val[0];
 		board_out[8] <= port_val[1];
-		board_out[7] <= port_val[2];
 
 		port_val <= port_val + 1;
 	endrule
@@ -127,6 +128,7 @@ module mkBs_top(Bs_top);
 	rule r_btn0(btn0 && !debouncing0);
 		$display("[%d] btn0 was pressed!", $time);
 		led1_state <= !led1_state;
+		i2s.toggle_running();
 
 		// start debouncing
 		debounce_counter0[1] <= fromInteger(c_debounce_delay);
@@ -246,6 +248,19 @@ module mkBs_top(Bs_top);
 	// 	board_out[6] <= rgb_drv.update_rgb();
 	// endrule
 
+	/* Drive the I2S pins */
+	(* fire_when_enabled, no_implicit_conditions *)
+	rule i2s_update;
+		board_out[0] <= i2s.getLRCLK();
+		board_out[1] <= i2s.getSCLK();
+		board_out[2] <= i2s.getSDATA();
+
+		// DEBUG: Scope
+		board_out[5] <= i2s.getLRCLK();
+		board_out[6] <= i2s.getSCLK();
+		board_out[7] <= i2s.getSDATA();
+	endrule
+
 	/* Drive the UART TX Pin and read the RX pin and pass it to the drv */
 	(* fire_when_enabled, no_implicit_conditions *)
 	rule uart_update;
@@ -256,8 +271,8 @@ module mkBs_top(Bs_top);
 		uart_drv.putRX(board_in[3]);
 
 		// DEBUG: send RX+TX to scope
-		board_out[5] <= uart_drv.getTX();
-		board_out[6] <= board_in[3];
+		// board_out[5] <= uart_drv.getTX();
+		// board_out[6] <= board_in[3];
 	endrule
 
 	/* Connect high level board periphery to FPGA pins */

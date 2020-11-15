@@ -14,9 +14,13 @@ read_xdc ./src/constraints.xdc
 
 # import IP Cores that are used in the design
 read_ip $outputDir/IP_proj/project1.srcs/sources_1/ip/myUartLite/myUartLite.xci
+read_ip $outputDir/IP_proj/project1.srcs/sources_1/ip/myI2S/myI2S.xci
+
+# import external BD
+read_bd $outputDir/BD_proj/project1.srcs/sources_1/bd/myDesign/myDesign.bd
 
 synth_design -top $topmodule -part $device
-# opt_design
+opt_design
 place_design -directive Quick
 route_design -directive Quick
 

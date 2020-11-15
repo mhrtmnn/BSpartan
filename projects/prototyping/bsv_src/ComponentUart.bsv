@@ -94,17 +94,12 @@ module mkUARTip(UARTip);
 	endrule
 
 	rule uart_setup(!setup_done);
-		$display("[Drv] Enabling Interrupts");
+		$display("[UART] Enabling Interrupts");
 
 		Bit#(8) regVal = 0;
 		regVal[reg_CTRL_IntrEn] = 1;
 
-		let t = AXI_TX_tfer {
-			addr 	: fromInteger(uartLite_reg_CTRL),
-			data 	: extend(regVal),
-			strobe 	: fromInteger(get_strobe(regVal))
-		};
-		axi.tx.put(t);
+		axilite_send(axi, fromInteger(uartLite_reg_CTRL), regVal);
 
 		setup_done <= True;
 	endrule
@@ -112,25 +107,19 @@ module mkUARTip(UARTip);
 	/********************** RECEIVE **********************/
 
 	rule rx0(setup_done && pending_intr && rx_state == 0);
-		let t = AXI_RX_tfer {
-			addr:fromInteger(uartLite_reg_STAT)
-		};
-		axi.rx.request.put(t);
+		axilite_recv_start(axi, fromInteger(uartLite_reg_STAT));
 		rx_state <= 1;
 	endrule
 
 	rule rx1(setup_done && pending_intr && rx_state == 1);
-		let statReg <- axi.rx.response.get();
+		let statReg <- axilite_recv_get(axi);
 		stat_reg <= truncate(statReg);
 
 		// If there is valid RX data then get it
 		if (statReg[reg_STAT_RxFifoValid] == 1) begin
-			$display("[Drv] send (Getting char from RX FIFO");
+			$display("[UART] send (Getting char from RX FIFO");
 
-			let t = AXI_RX_tfer {
-				addr:fromInteger(uartLite_reg_RX)
-			};
-			axi.rx.request.put(t);
+			axilite_recv_start(axi, fromInteger(uartLite_reg_RX));
 			rx_state <= 2;
 		end else begin
 			rx_state <= 0;
@@ -139,7 +128,7 @@ module mkUARTip(UARTip);
 	endrule
 
 	rule rx2(setup_done && pending_intr && rx_state == 2);
-		let rxReg <- axi.rx.response.get();
+		let rxReg <- axilite_recv_get(axi);
 
 		/**
 		 * Avoid blocking and deadlocking here by dropping
@@ -154,28 +143,20 @@ module mkUARTip(UARTip);
 	/********************** TRANSMIT *********************/
 
 	rule tx0(setup_done && !pending_intr && tx_state == 0 && tx_char.notEmpty);
-		let t = AXI_RX_tfer {
-			addr:fromInteger(uartLite_reg_STAT)
-		};
-		axi.rx.request.put(t);
+		axilite_recv_start(axi, fromInteger(uartLite_reg_STAT));
 		tx_state <= 1;
 	endrule
 
 	rule tx1(setup_done && !pending_intr && tx_state == 1);
-		let statReg <- axi.rx.response.get();
+		let statReg <- axilite_recv_get(axi);
 		stat_reg <= truncate(statReg);
 
 		// if we have a pending TX char and FIFO is nonempty then send it
 		if (statReg[reg_STAT_TxFifoFull] == 0) begin
 			let c = tx_char.first(); tx_char.deq();
-			$display("[Drv] send (c=%d)", c);
+			$display("[UART] send (c=%d)", c);
 
-			let t = AXI_TX_tfer {
-				addr 	: fromInteger(uartLite_reg_TX),
-				data 	: extend(c),
-				strobe 	: fromInteger(get_strobe(c))
-			};
-			axi.tx.put(t);
+			axilite_send(axi, fromInteger(uartLite_reg_TX), c);
 		end
 
 		tx_state <= 0;

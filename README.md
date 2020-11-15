@@ -28,10 +28,13 @@ Connection:
 ## Build instructions
 Make sure vivado is in PATH, or alternatively put a `cfg.local` file in the `projects` directory that defines the variable `VIVADO := .../bin/vivado`.
 
-In one of the project directories execute:
+In the prototyping project directory execute:
 ```
-# build Xilinx UARTLite IPCore
+# build IPCores
 make build_ip
+
+# build block design
+make build_bd
 
 # compile Bluespec design
 make update_bsv
@@ -42,3 +45,19 @@ make synth
 # program FPGA (alternatively via JTAG or OTA)
 make ocd
 ```
+
+## Connection
+The following peripherals are connected to the FPGA GPIOs.
+
+| Pin | Peripheral     |
+|-----|----------------|
+| IO0 | I2S LRCLK      |
+| IO1 | I2S SCLK       |
+| IO2 | I2S SDATA      |
+| IO3 | UART RX        |
+| IO4 | UART TX        |
+| IO5 | Logic Analyzer |
+| IO6 | Logic Analyzer |
+| IO7 | Logic Analyzer |
+| IO8 | Logic Analyzer |
+| IO9 | Logic Analyzer |

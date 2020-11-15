@@ -5,9 +5,11 @@ XVCD     ?= xvcd
 
 BIT      := spartan_top.bit
 URL      := esp32_upload.local
-V_FLAGS  := -nojournal -nolog -mode batch
+V_FLAGS  := -nojournal -log output/vivado.log -mode batch
 
-IP_STUBS := output/IP_proj/project1.srcs/sources_1/ip/myUartLite/myUartLite_stub.v
+BD_STUBS := output/BD_proj/project1.srcs/sources_1/bd/myDesign/myDesign_stub.v
+IP_BASE  := output/IP_proj/project1.srcs/sources_1/ip
+IP_STUBS := $(IP_BASE)/myUartLite/myUartLite_stub.v $(IP_BASE)/myI2S/myI2S_stub.v
 LIBS     := bsv_lib/*
 
 .PHONY: sim
@@ -15,7 +17,7 @@ LIBS     := bsv_lib/*
 
 ################### RTL Stuff ###################
 hdl_build:
-	iverilog $(IP_STUBS) $(LIBS) src/*.v -o sim.out
+	iverilog $(BD_STUBS) $(IP_STUBS) $(LIBS) src/*.v -o sim.out
 
 hdl_sim: hdl_build
 	./sim.out
@@ -31,6 +33,9 @@ synth:
 
 build_ip:
 	$(VIVADO) $(V_FLAGS) -source build_ip.tcl
+
+build_bd:
+	$(VIVADO) $(V_FLAGS) -source build_bd.tcl
 
 jtag:
 	$(VIVADO) $(V_FLAGS) -source jtag_program.tcl

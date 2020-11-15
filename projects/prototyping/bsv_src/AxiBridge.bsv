@@ -28,6 +28,36 @@ typedef struct {
 	Bit#(a_len) 			addr;
 } AXI_RX_tfer#(numeric type a_len) deriving (Bits);
 
+// helper function TX
+function Action axilite_send(AxiBridge#(d, a) axi, Bit#(a) addr, Bit#(n) data) provisos(Add#(n, _unused, d));
+action
+	let t = AXI_TX_tfer {
+		addr 	: addr,
+		data 	: extend(data),
+		strobe 	: fromInteger(get_strobe(data))
+	};
+	axi.tx.put(t);
+endaction
+endfunction
+
+// helper function RX 1
+function Action axilite_recv_start(AxiBridge#(d, a) axi, Bit#(a) addr);
+action
+	let t = AXI_RX_tfer {
+		addr:addr
+	};
+	axi.rx.request.put(t);
+endaction
+endfunction
+
+// helper function RX 2
+function ActionValue#(Bit#(d)) axilite_recv_get(AxiBridge#(d, a) axi);
+actionvalue
+	let val <- axi.rx.response.get();
+	return val;
+endactionvalue
+endfunction
+
 
 /******************************************************
 * FUNCTIONS
@@ -118,7 +148,7 @@ module mkAxiBridge#(AxiLiteIface#(d_len, a_len) coreAXI) (AxiBridge#(d_len, a_le
 	/******************** IFACE RULES ********************/
 
 	rule axi_tx_iface(!pending_w_addr && !pending_w_data);
-		$display("[%d] Deq from tx_fifo_in", $time);
+		$display("[AXIlite] [%d] Deq from tx_fifo_in", $time);
 
 		// discard head, which was successfully transferred
 		tx_fifo_in.deq();
@@ -128,7 +158,7 @@ module mkAxiBridge#(AxiLiteIface#(d_len, a_len) coreAXI) (AxiBridge#(d_len, a_le
 	endrule
 
 	rule axi_rx_iface(!pending_r_addr);
-		$display("[%d] Deq from rx_fifo_in", $time);
+		$display("[AXIlite] [%d] Deq from rx_fifo_in", $time);
 
 		// discard head, which was successfully transferred
 		rx_fifo_in.deq();
@@ -196,7 +226,6 @@ module mkAxiBridge#(AxiLiteIface#(d_len, a_len) coreAXI) (AxiBridge#(d_len, a_le
 
 	// AW Channel
 	rule axi_AW(clk == 1 && pending_w_addr && axi_aw_state == 0);
-		$display("[%d] ===> AW S0", $time);
 
 		// change signal levels once clock goes low
 		buf_awaddr 		<= tx_fifo_in.first.addr;
@@ -206,18 +235,14 @@ module mkAxiBridge#(AxiLiteIface#(d_len, a_len) coreAXI) (AxiBridge#(d_len, a_le
 	endrule
 
 	rule axi_AW_ctrl(clk == 1 && pending_w_addr && axi_aw_state == 1);
-		$display("[%d] ===> AW S1", $time);
 
 		// read signal levels while clock is high
 		if (coreAXI.getAWready() == 1) begin
-			$display("AW S1 (got awready)");
-
 			axi_aw_state <= 2;
 		end
 	endrule
 
 	rule axi_AW_ctrl1(clk == 1 && pending_w_addr && axi_aw_state == 2);
-		$display("[%d] ===> AW S2", $time);
 
 		// change signal levels once clock goes low
 		buf_awaddr 		<= 0;
@@ -228,7 +253,6 @@ module mkAxiBridge#(AxiLiteIface#(d_len, a_len) coreAXI) (AxiBridge#(d_len, a_le
 
 	// W Channel
 	rule axi_W(clk == 1 && pending_w_data && axi_w_state == 0);
-		$display("[%d] ===>  W S0", $time);
 
 		// change signal levels once clock goes low
 		buf_wdata 	<= tx_fifo_in.first.data;
@@ -239,18 +263,14 @@ module mkAxiBridge#(AxiLiteIface#(d_len, a_len) coreAXI) (AxiBridge#(d_len, a_le
 	endrule
 
 	rule axi_W_ctrl(clk == 1 && pending_w_data && axi_w_state == 1);
-		$display("[%d] ===>  W S1", $time);
 
 		// read signal levels while clock is high
 		if (coreAXI.getWready() == 1) begin
-			$display(" W S1 (got wready)");
-
 			axi_w_state <= 2;
 		end
 	endrule
 
 	rule axi_W_ctrl1(clk == 1 && pending_w_data && axi_w_state == 2);
-		$display("[%d] ===>  W S2", $time);
 
 		// change signal levels once clock goes low
 		buf_wdata 	<= 0;
@@ -274,7 +294,7 @@ module mkAxiBridge#(AxiLiteIface#(d_len, a_len) coreAXI) (AxiBridge#(d_len, a_le
 				pending_w_addr <= False;
 				pending_w_data <= False;
 			end else begin
-				$display("AXI Write Error: %d (retrying)", b_resp);
+				$display("[AXIlite] AXI Write Error: %d (retrying)", b_resp);
 			end
 
 			axi_w_state 	<= 0;
