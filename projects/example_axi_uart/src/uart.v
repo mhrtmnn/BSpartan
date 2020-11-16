@@ -21,22 +21,22 @@ module test(
 		end
 	end
 
-  wire reset_rtl_0;
-  wire uart_rtl_0_rxd;
-  wire uart_rtl_0_txd;
-  
-  assign reset_rtl_0 = ~i_rst_n;
-  assign clk_100MHz = clk;
-  
-  // data lines
-  assign uart_rtl_0_rxd = 0;
-  assign uart_rtl_0_txd = gport_a[5];
+	wire reset_rtl_0;
+	wire uart_rtl_0_rxd;
+	wire uart_rtl_0_txd;
 
-  // instantiate block design
-  jtag_to_uart myUart
-       (.clk_100MHz(clk_100MHz),
-        .reset_rtl_0(reset_rtl_0),
-        .uart_rtl_0_rxd(uart_rtl_0_rxd),
-        .uart_rtl_0_txd(uart_rtl_0_txd));
+	assign reset_rtl_0 = ~i_rst_n;
+	assign clk_100MHz = clk;
+
+	// data lines
+	assign uart_rtl_0_rxd = 0;
+	assign uart_rtl_0_txd = gport_a[5];
+
+	// instantiate block design
+	jtag_to_uart myUart
+	   (.clk_100MHz(clk_100MHz),
+	    .reset_rtl_0(reset_rtl_0),
+	    .uart_rtl_0_rxd(uart_rtl_0_rxd),
+	    .uart_rtl_0_txd(uart_rtl_0_txd));
 
 endmodule

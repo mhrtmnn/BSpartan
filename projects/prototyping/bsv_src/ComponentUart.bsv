@@ -28,42 +28,42 @@ endinterface
 module mkUARTip(UARTip);
 
 	/* imported "UARTLite" IP Core module */
-	UartLiteIp uartIP 		<- mkUartLiteIp;
+	UartLiteIp uartIP       <- mkUartLiteIp;
 
 	/* high level interface adapter for IPCore's AXI interface */
-	AxiBridge#(32, 4) axi	<- mkAxiBridge(uartIP.axi);
+	AxiBridge#(32, 4) axi   <- mkAxiBridge(uartIP.axi);
 
 	/* internal state */
-	Reg#(Bool) setup_done 		<- mkReg(False);
-	Reg#(Bit#(8)) stat_reg	 	<- mkReg('hab);
-	Reg#(Bit#(4)) rst_cnter 	<- mkReg(0);
-	Reg#(Bool) pending_intr 	<- mkReg(False);
-	Reg#(UInt#(4)) tx_state 	<- mkReg(0);
-	Reg#(UInt#(4)) rx_state 	<- mkReg(0);
-	Reg#(UInt#(18)) poll_cnter 	<- mkReg(0);
+	Reg#(Bool) setup_done       <- mkReg(False);
+	Reg#(Bit#(8)) stat_reg      <- mkReg('hab);
+	Reg#(Bit#(4)) rst_cnter     <- mkReg(0);
+	Reg#(Bool) pending_intr     <- mkReg(False);
+	Reg#(UInt#(4)) tx_state     <- mkReg(0);
+	Reg#(UInt#(4)) rx_state     <- mkReg(0);
+	Reg#(UInt#(18)) poll_cnter  <- mkReg(0);
 
-	FIFOF#(Byte) rx_char 		<- mkBypassFIFOF();
-	FIFOF#(Byte) tx_char 		<- mkBypassFIFOF();
+	FIFOF#(Byte) rx_char        <- mkBypassFIFOF();
+	FIFOF#(Byte) tx_char        <- mkBypassFIFOF();
 
 	/* Register Addresses */
-	Integer uartLite_base 			= 0;
-	Integer uartLite_reg_RX 		= uartLite_base + 'h0;
-	Integer uartLite_reg_TX 		= uartLite_base + 'h4;
-	Integer uartLite_reg_STAT 		= uartLite_base + 'h8;
-	Integer uartLite_reg_CTRL 		= uartLite_base + 'hC;
+	Integer uartLite_base           = 0;
+	Integer uartLite_reg_RX         = uartLite_base + 'h0;
+	Integer uartLite_reg_TX         = uartLite_base + 'h4;
+	Integer uartLite_reg_STAT       = uartLite_base + 'h8;
+	Integer uartLite_reg_CTRL       = uartLite_base + 'hC;
 
 	/* CTRL Register */
-	Integer reg_CTRL_IntrEn 		= 4;
+	Integer reg_CTRL_IntrEn         = 4;
 
 	/* STAT Register */
-	Integer reg_STAT_ParityErr 		= 7;
-	Integer reg_STAT_FrameErr 		= 6;
-	Integer reg_STAT_OverrunErr 	= 5;
-	Integer reg_STAT_IntrEnabled 	= 4;
-	Integer reg_STAT_TxFifoFull 	= 3;
-	Integer reg_STAT_TxFifoEmpty 	= 2;
-	Integer reg_STAT_RxFifoFull 	= 1;
-	Integer reg_STAT_RxFifoValid 	= 0;
+	Integer reg_STAT_ParityErr      = 7;
+	Integer reg_STAT_FrameErr       = 6;
+	Integer reg_STAT_OverrunErr     = 5;
+	Integer reg_STAT_IntrEnabled    = 4;
+	Integer reg_STAT_TxFifoFull     = 3;
+	Integer reg_STAT_TxFifoEmpty    = 2;
+	Integer reg_STAT_RxFifoFull     = 1;
+	Integer reg_STAT_RxFifoValid    = 0;
 
 	/* timing */
 	Integer poll_delay = 1 * c_US;

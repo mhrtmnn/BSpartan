@@ -33,58 +33,58 @@ endinterface
 module mkI2Sip(I2Sip);
 
 	/* constants */
-	Integer aud_len   = 13335; 		// no of samples in audio
-	Integer f_sample  = 11025; 		// sampling frequency of aufio
-	Integer f_i2c     = f_sys/2; 	// aud_mclk of I2S IP
+	Integer aud_len   = 13335;      // no of samples in audio
+	Integer f_sample  = 11025;      // sampling frequency of aufio
+	Integer f_i2c     = f_sys/2;    // aud_mclk of I2S IP
 
 	/* reference BRAM */
 	BRAM_PORT#(Bit#(16), Smpl_t) bsv_bram <- mkBRAMCore1Load(aud_len, True, "./bram_init.mem", False);
 
 	/* imported IP Cores */
-	I2SIp i2s 		<- mkI2SIp;
-	BramIp bram 	<- mkBramIp;
+	I2SIp i2s       <- mkI2SIp;
+	BramIp bram     <- mkBramIp;
 
 	/* high level interface adapter for IPCore's AXI and AXI Stream interface */
-	AxiBridge#(32, 12) 		axi_bram	<- mkAxiBridge(bram.axi);
-	AxiBridge#(32, 8) 		axi_ctrl	<- mkAxiBridge(i2s.ctrl_axi);
-	AxiStreamBridge#(32) 	axi_str 	<- mkAxiStreamBridge(i2s.axis);
+	AxiBridge#(32, 12)      axi_bram    <- mkAxiBridge(bram.axi);
+	AxiBridge#(32, 8)       axi_ctrl    <- mkAxiBridge(i2s.ctrl_axi);
+	AxiStreamBridge#(32)    axi_str     <- mkAxiStreamBridge(i2s.axis);
 
 	/* internal state */
-	FIFO#(Smpl_t) sample_fifo 	<- mkBypassFIFO();
+	FIFO#(Smpl_t) sample_fifo   <- mkBypassFIFO();
 
-	Reg#(Bit#(4)) rst_cnter 	<- mkReg(0);
-	Reg#(Bit#(4)) setup_cnt 	<- mkReg(0);
-	Reg#(bit) player_select		<- mkReg(0);
-	Reg#(bit) filler_state 		<- mkReg(0);
-	Reg#(Bool) setup_done 		<- mkReg(False);
-	Reg#(Bool) is_running 		<- mkReg(False);
-	Reg#(Smpl_t) chan_2 		<- mkReg(0);
-	Reg#(Bit#(4)) state 		<- mkReg(0);
-	Reg#(Bit#(16)) pos 			<- mkReg(0);
-	Reg#(Bool) written 			<- mkReg(False);
-	Reg#(bit) bstate 			<- mkReg(0);
-	Reg#(bit) clk 				<- mkReg(0);
+	Reg#(Bit#(4)) rst_cnter     <- mkReg(0);
+	Reg#(Bit#(4)) setup_cnt     <- mkReg(0);
+	Reg#(bit) player_select     <- mkReg(0);
+	Reg#(bit) filler_state      <- mkReg(0);
+	Reg#(Bool) setup_done       <- mkReg(False);
+	Reg#(Bool) is_running       <- mkReg(False);
+	Reg#(Smpl_t) chan_2         <- mkReg(0);
+	Reg#(Bit#(4)) state         <- mkReg(0);
+	Reg#(Bit#(16)) pos          <- mkReg(0);
+	Reg#(Bool) written          <- mkReg(False);
+	Reg#(bit) bstate            <- mkReg(0);
+	Reg#(bit) clk               <- mkReg(0);
 
 	/* Register Addresses */
-	Integer i2s_base 			= 0;
-	Integer i2s_reg_Ctrl 		= i2s_base + 'h08;
-	Integer i2s_reg_TimingCtrl 	= i2s_base + 'h20;
+	Integer i2s_base            = 0;
+	Integer i2s_reg_Ctrl        = i2s_base + 'h08;
+	Integer i2s_reg_TimingCtrl  = i2s_base + 'h20;
 
 	/* Control Register */
-	Integer reg_Ctrl_CoreEN 	= 0;
+	Integer reg_Ctrl_CoreEN     = 0;
 
 
 	/******************************************************
 	* FUNCTIONS
 	******************************************************/
 	function Bit#(32) encode(Smpl_t sample, bit channel);
-		Bit#(1) parity   = reduceXor(sample); 	// [31] even parity
-		Bit#(1) status   = 'b0; 				// [30] one status bit per frame, 192 frames per block
-		Bit#(1) user     = 'b0; 				// [29] arbitrary user data
-		Bit#(1) validity = 'b0; 				// [28] 0: subframe is valid, 1: invalid
-		Bit#(16) data    = sample; 				// [12:27] audio data
-		Bit#(8) padding  = 'b0; 				// [4:11] zero padding for 16bit/sample (none for 24bit)
-		Bit#(4) preamble; 						// [0:3]
+		Bit#(1) parity   = reduceXor(sample);   // [31] even parity
+		Bit#(1) status   = 'b0;                 // [30] one status bit per frame, 192 frames per block
+		Bit#(1) user     = 'b0;                 // [29] arbitrary user data
+		Bit#(1) validity = 'b0;                 // [28] 0: subframe is valid, 1: invalid
+		Bit#(16) data    = sample;              // [12:27] audio data
+		Bit#(8) padding  = 'b0;                 // [4:11] zero padding for 16bit/sample (none for 24bit)
+		Bit#(4) preamble;                       // [0:3]
 		if (channel == 0)
 			preamble = 'b0001;
 		else
@@ -223,8 +223,8 @@ module mkI2Sip(I2Sip);
 
 		axis_send(axi_str, encode(sample_val, 0), 0);
 
-		state 	<= 1;
-		chan_2 	<= sample_val;
+		state   <= 1;
+		chan_2  <= sample_val;
 	endrule
 
 	rule data2(setup_done && written && state == 1);

@@ -49,8 +49,8 @@ module mkRGBDriver(RGBDriver);
 	Reg#(Bool) init_done <- mkReg(False);
 	Reg#(UInt#(20)) comp <- mkReg(0);
 	Reg#(UInt#(2)) state <- mkReg(3);
-	Reg#(UInt#(5)) pos <- mkReg(0);
-	Reg#(bit) led_num <- mkReg(0);
+	Reg#(UInt#(5)) pos   <- mkReg(0);
+	Reg#(bit) led_num    <- mkReg(0);
 
 	/* value used to drive the DIN pin */
 	Reg#(bit) rgb_data <- mkReg(0);

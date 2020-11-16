@@ -18,7 +18,7 @@ WebServer server(80);
 spartan_edge_esp32_boot esp32Cla;
 
 const char* serverIndex = "<form method='POST' action='/update' enctype='multipart/form-data'>" \
-							"<input type='file' name='update'><input type='submit' value='Update'>" \
+						      "<input type='file' name='update'><input type='submit' value='Update'>" \
 						  "</form>";
 
 

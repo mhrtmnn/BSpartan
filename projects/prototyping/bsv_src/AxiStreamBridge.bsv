@@ -13,15 +13,15 @@ typedef enum { NVALID, VALID } AxiValid deriving (Bits);
 
 typedef struct {
 	Bit#(d_len) data;
-	Bit#(3) 	tid;
+	Bit#(3)     tid;
 } AXIS_tfer#(numeric type d_len) deriving (Bits);
 
 // helper function
 function Action axis_send(AxiStreamBridge#(n) axi, Bit#(n) d, Bit#(3) t);
 action
 	let tfer = AXIS_tfer {
-		data 	: d,
-		tid 	: t
+		data    : d,
+		tid     : t
 	};
 	axi.tx.put(tfer);
 endaction
@@ -50,14 +50,14 @@ endinterface
 module mkAxiStreamBridge#(AxiStreamIface#(d_len) coreAXI) (AxiStreamBridge#(d_len));
 
 	/* module state */
-	FIFO#(AXIS_tfer#(d_len)) tx_fifo_in 	<- mkFIFO();
-	Reg#(Bit#(2)) axis_state 				<- mkReg(0);
-	Reg#(bit) clk 							<- mkReg(0);
+	FIFO#(AXIS_tfer#(d_len)) tx_fifo_in     <- mkFIFO();
+	Reg#(Bit#(2)) axis_state                <- mkReg(0);
+	Reg#(bit) clk                           <- mkReg(0);
 
 	/* output buffers */
-	Reg#(Bit#(    1)) buf_valid 	<- mkReg(0);
-	Reg#(Bit#(d_len)) buf_data 		<- mkReg(0);
-	Reg#(Bit#(    3)) buf_tid 		<- mkReg(0);
+	Reg#(Bit#(    1)) buf_valid     <- mkReg(0);
+	Reg#(Bit#(d_len)) buf_data      <- mkReg(0);
+	Reg#(Bit#(    3)) buf_tid       <- mkReg(0);
 
 
 	/******************************************************
@@ -67,9 +67,9 @@ module mkAxiStreamBridge#(AxiStreamIface#(d_len) coreAXI) (AxiStreamBridge#(d_le
 	rule axis(clk == 1 && axis_state == 0);
 
 		// change signal levels once clock goes low
-		buf_data 	<= tx_fifo_in.first.data;
-		buf_tid 	<= tx_fifo_in.first.tid;
-		buf_valid 	<= pack(VALID);
+		buf_data    <= tx_fifo_in.first.data;
+		buf_tid     <= tx_fifo_in.first.tid;
+		buf_valid   <= pack(VALID);
 
 		axis_state <= 1;
 	endrule
@@ -86,12 +86,12 @@ module mkAxiStreamBridge#(AxiStreamIface#(d_len) coreAXI) (AxiStreamBridge#(d_le
 	rule axis_ctrl1(clk == 1 && axis_state == 2);
 
 		// change signal levels once clock goes low
-		buf_data 	<= 0;
-		buf_tid 	<= 0;
-		buf_valid 	<= pack(NVALID);
+		buf_data    <= 0;
+		buf_tid     <= 0;
+		buf_valid   <= pack(NVALID);
 
 		tx_fifo_in.deq();
-		axis_state 	<= 0;
+		axis_state  <= 0;
 	endrule
 
 

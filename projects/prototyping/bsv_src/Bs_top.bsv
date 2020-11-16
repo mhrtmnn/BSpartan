@@ -12,8 +12,8 @@ import Vector::*;
 /******************************************************
 * CONSTANTS
 ******************************************************/
-Integer c_debounce_delay  	= 200 * c_MS;
-Integer c_led_blink_delay 	=   1 * c_S;
+Integer c_debounce_delay    = 200 * c_MS;
+Integer c_led_blink_delay   =   1 * c_S;
 
 List#(Char) uart_hello = stringToCharList("Hello Hello World!\n\x0d");
 List#(Char) uart_echo  = stringToCharList("Echo >>> 'X'\n\x0d");
@@ -42,17 +42,17 @@ endinterface
 
 module mkBs_top(Bs_top);
 	/* sub modules */
-	let rgb_drv 	<- mkRGBDriver();
-	let uart_drv 	<- mkUARTip();
-	let i2s 		<- mkI2Sip();
+	let rgb_drv     <- mkRGBDriver();
+	let uart_drv    <- mkUARTip();
+	let i2s         <- mkI2Sip();
 
 	/* state of GPIO ports */
-	Vector#(10, Reg#(bit)) board_in 	<- replicateM(mkReg(0));
-	Vector#(10, Reg#(bit)) board_out 	<- replicateM(mkReg(0));
-	Vector#( 8, Reg#(bit)) r_gport_a 	<- replicateM(mkReg(0));
-	Vector#( 8, Reg#(bit)) r_gport_b 	<- replicateM(mkReg(0));
-	Vector#( 8, Reg#(Bool)) gport_a_en	<- replicateM(mkReg(True));
-	Vector#( 8, Reg#(Bool)) gport_b_en	<- replicateM(mkReg(True));
+	Vector#(10, Reg#(bit)) board_in     <- replicateM(mkReg(0));
+	Vector#(10, Reg#(bit)) board_out    <- replicateM(mkReg(0));
+	Vector#( 8, Reg#(bit)) r_gport_a    <- replicateM(mkReg(0));
+	Vector#( 8, Reg#(bit)) r_gport_b    <- replicateM(mkReg(0));
+	Vector#( 8, Reg#(Bool)) gport_a_en  <- replicateM(mkReg(True));
+	Vector#( 8, Reg#(Bool)) gport_b_en  <- replicateM(mkReg(True));
 
 	Vector#(8, TriState#(bit)) t_gport_a = newVector();
 	Vector#(8, TriState#(bit)) t_gport_b = newVector();
@@ -73,14 +73,14 @@ module mkBs_top(Bs_top);
 	Reg#(Maybe#(Byte)) pnd_echo <- mkReg(tagged Invalid);
 	Reg#(UInt#(27)) led_counter <- mkReg(0);
 	Reg#(UInt#(5))  clk_counter <- mkReg(0);
-	Reg#(Bool) uart_tx_running	<- mkReg(False);
-	Reg#(Bit#(2)) rgb_state 	<- mkReg(0);
-	Reg#(UInt#(5)) uart_pos 	<- mkReg(0);
-	Reg#(Bit#(3)) port_val 		<- mkReg(0);
-	Reg#(Bool) led0_state 		<- mkReg(False);
-	Reg#(Bool) led1_state 		<- mkReg(True);
-	Wire#(Bool) do_led 			<- mkWire();
-	Wire#(Bool) do_clk 			<- mkWire();
+	Reg#(Bool) uart_tx_running  <- mkReg(False);
+	Reg#(Bit#(2)) rgb_state     <- mkReg(0);
+	Reg#(UInt#(5)) uart_pos     <- mkReg(0);
+	Reg#(Bit#(3)) port_val      <- mkReg(0);
+	Reg#(Bool) led0_state       <- mkReg(False);
+	Reg#(Bool) led1_state       <- mkReg(True);
+	Wire#(Bool) do_led          <- mkWire();
+	Wire#(Bool) do_clk          <- mkWire();
 
 
 	/******************************************************
@@ -192,7 +192,7 @@ module mkBs_top(Bs_top);
 
 		// Debug: test status read capabilities
 		// if(uart_pos == 0 || uart_pos == 8) begin
-		// 	b = uart_drv.getStatus();
+		//  b = uart_drv.getStatus();
 		// end
 
 		uart_drv.send(b);
@@ -245,7 +245,7 @@ module mkBs_top(Bs_top);
 	/* DEBUG: drive GPIO same way as RGB LED */
 	// (* fire_when_enabled *)
 	// rule debug_pin;
-	// 	board_out[6] <= rgb_drv.update_rgb();
+	//  board_out[6] <= rgb_drv.update_rgb();
 	// endrule
 
 	/* Drive the I2S pins */
