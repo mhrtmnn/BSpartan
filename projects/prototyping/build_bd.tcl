@@ -23,17 +23,13 @@ set_property -dict [list                       \
 	CONFIG.ECC_TYPE                 {0}        \
 	] [get_bd_cells myBramCtrl]
 
-set_property -dict [list                                     \
-	CONFIG.use_bram_block {Stand_Alone}                      \
-	CONFIG.Enable_32bit_Address {true}                       \
-	CONFIG.Use_Byte_Write_Enable {true}                      \
-	CONFIG.Byte_Size {8}                                     \
-	CONFIG.Write_Depth_A {4096}                              \
-	CONFIG.Register_PortA_Output_of_Memory_Primitives {true} \
-	CONFIG.Load_Init_File {true}                             \
-	CONFIG.Coe_File $coe_file                                \
-	CONFIG.Use_RSTA_Pin {true}                               \
-	CONFIG.EN_SAFETY_CKT {true}                              \
+set_property -dict [list                       \
+	CONFIG.use_bram_block {Stand_Alone}        \
+	CONFIG.Read_Width_A   {32}                 \
+	CONFIG.Write_Width_A  {32}                 \
+	CONFIG.Write_Depth_A  {16}                 \
+	CONFIG.Load_Init_File {true}               \
+	CONFIG.Coe_File       $coe_file            \
 	] [get_bd_cells myBram]
 
 # connect ports
